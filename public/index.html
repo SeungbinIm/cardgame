@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>판타지 카드게임 UI</title>
+  <style>
+    :root {
+      --bg-top: #1d1a2f;
+      --bg-bottom: #0e0c18;
+      --board: #2b223d;
+      --board-edge: #5f4a87;
+      --hero-frame: #8f6a2d;
+      --hero-core: #3a2b1c;
+      --mana: #38b6ff;
+      --mana-off: #2a3f54;
+      --card-top: #f7e5bf;
+      --card-bottom: #d8b06a;
+      --card-border: #6f4f21;
+      --text: #f7f3e8;
+      --accent: #ffd25e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 30%, #35244f 0%, var(--bg-top) 50%, var(--bg-bottom) 100%);
+      color: var(--text);
+    }
+
+    .game-ui {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr 2.1fr 1.5fr;
+      gap: 1.2vh;
+      padding: 1.8vh 1.2vw;
+    }
+
+    .hero-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hero {
+      width: min(20vw, 180px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 6px solid var(--hero-frame);
+      background:
+        radial-gradient(circle at 30% 30%, #5f4732 0 20%, transparent 35%),
+        radial-gradient(circle at 70% 70%, #281e13 0 25%, transparent 40%),
+        linear-gradient(145deg, #5e3f1f, var(--hero-core));
+      box-shadow: 0 0 0 3px #2b2012 inset, 0 10px 20px rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      padding-bottom: 12px;
+      position: relative;
+    }
+
+    .hero-name {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55);
+      font-size: clamp(12px, 1.2vw, 16px);
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+
+    .health {
+      position: absolute;
+      right: -8px;
+      bottom: 6px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 3px solid #5f1313;
+      background: linear-gradient(#ff6666, #be2323);
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .battlefield {
+      border-radius: 18px;
+      border: 4px solid var(--board-edge);
+      background:
+        radial-gradient(circle at 50% 50%, #3a2a52 0%, #2b223d 70%),
+        linear-gradient(180deg, #2f2743 0%, #1f1830 100%);
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(255, 210, 94, 0.08);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      align-items: center;
+      justify-items: center;
+      padding: 1vh 1vw;
+    }
+
+    .battle-lane {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(247, 243, 232, 0.75);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: clamp(12px, 1.2vw, 18px);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .battle-lane + .battle-lane {
+      border-top: 2px dashed rgba(255, 210, 94, 0.3);
+    }
+
+    .player-zone {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1vw;
+      align-items: end;
+      min-height: 0;
+    }
+
+    .mana-panel {
+      align-self: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(117, 196, 255, 0.7);
+      border-radius: 14px;
+      padding: 12px 10px;
+      min-width: 82px;
+      box-shadow: inset 0 0 15px rgba(56, 182, 255, 0.22);
+    }
+
+    .mana-title {
+      text-align: center;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+      color: #bfe8ff;
+      font-weight: 700;
+    }
+
+    .mana-gems {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      place-items: center;
+    }
+
+    .gem {
+      width: 16px;
+      height: 16px;
+      transform: rotate(45deg);
+      border-radius: 3px;
+      border: 1px solid #6fd4ff;
+      background: linear-gradient(140deg, #b4ebff 0%, var(--mana) 55%, #0769ac 100%);
+      box-shadow: 0 0 7px rgba(56, 182, 255, 0.7);
+    }
+
+    .gem.off {
+      border-color: #607587;
+      background: linear-gradient(140deg, #566473 0%, var(--mana-off) 65%, #1f2e3d 100%);
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    .hand {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      gap: 0.9vw;
+      min-height: 0;
+      padding-bottom: 0.5vh;
+    }
+
+    .card {
+      width: min(12vw, 130px);
+      aspect-ratio: 2.5 / 3.5;
+      border-radius: 12px;
+      border: 3px solid var(--card-border);
+      background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+      box-shadow: 0 8px 14px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+    }
+
+    .cost {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ddf5ff 0%, #56c3ff 55%, #0f78be 100%);
+      border: 2px solid #d7f4ff;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .card-title {
+      margin: 10px 10px 0 42px;
+      font-size: clamp(10px, 0.8vw, 13px);
+      font-weight: 800;
+      color: #3e2d0f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-art {
+      margin: 6px 10px;
+      border-radius: 8px;
+      border: 2px solid rgba(60, 40, 12, 0.6);
+      background: radial-gradient(circle at 30% 25%, #f1d9a6 0%, #a67435 60%, #5b3f1a 100%);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 9px 8px;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 1px #000;
+    }
+
+    .atk,
+    .hp {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+    }
+
+    .atk {
+      background: linear-gradient(#f8ca6a, #d08219);
+      border: 2px solid #fff0b2;
+      color: #361e00;
+    }
+
+    .hp {
+      background: linear-gradient(#ff7a7a, #b62929);
+      border: 2px solid #ffd6d6;
+    }
+
+    .end-turn {
+      align-self: center;
+      padding: 14px 18px;
+      border: 3px solid #d3b276;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffd977 0%, #d9a535 50%, #9b7120 100%);
+      color: #352300;
+      font-weight: 900;
+      font-size: clamp(12px, 1.1vw, 16px);
+      letter-spacing: 0.03em;
+      box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+    }
+
+    .end-turn:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <main class="game-ui">
+    <section class="hero-row enemy">
+      <article class="hero">
+        <span class="hero-name">적 영웅</span>
+        <span class="health">30</span>
+      </article>
+    </section>
+
+    <section class="battlefield" aria-label="중앙 전장">
+      <div class="battle-lane">적 하수인 전장</div>
+      <div class="battle-lane">내 하수인 전장</div>
+    </section>
+
+    <section class="player-zone">
+      <aside class="mana-panel" aria-label="마나 표시">
+        <div class="mana-title">마나 6/10</div>
+        <div class="mana-gems">
+          <span class="gem"></span>
+          <span class="gem"></span>
+          <span class="gem"></span>
+          <span class="gem"></span>
+          <span class="gem"></span>
+          <span class="gem"></span>
+          <span class="gem off"></span>
+          <span class="gem off"></span>
+          <span class="gem off"></span>
+          <span class="gem off"></span>
+        </div>
+      </aside>
+
+      <div>
+        <section class="hero-row player">
+          <article class="hero">
+            <span class="hero-name">내 영웅</span>
+            <span class="health">30</span>
+          </article>
+        </section>
+
+        <section class="hand" aria-label="손패 5장">
+          <article class="card">
+            <span class="cost">1</span>
+            <h3 class="card-title">빛의 견습병</h3>
+            <div class="card-art"></div>
+            <footer class="card-footer"><span class="atk">1</span><span class="hp">2</span></footer>
+          </article>
+          <article class="card">
+            <span class="cost">3</span>
+            <h3 class="card-title">화염 창병</h3>
+            <div class="card-art"></div>
+            <footer class="card-footer"><span class="atk">3</span><span class="hp">3</span></footer>
+          </article>
+          <article class="card">
+            <span class="cost">4</span>
+            <h3 class="card-title">숲의 수호자</h3>
+            <div class="card-art"></div>
+            <footer class="card-footer"><span class="atk">4</span><span class="hp">5</span></footer>
+          </article>
+          <article class="card">
+            <span class="cost">5</span>
+            <h3 class="card-title">심연의 마도사</h3>
+            <div class="card-art"></div>
+            <footer class="card-footer"><span class="atk">5</span><span class="hp">4</span></footer>
+          </article>
+          <article class="card">
+            <span class="cost">7</span>
+            <h3 class="card-title">고대 용기사</h3>
+            <div class="card-art"></div>
+            <footer class="card-footer"><span class="atk">7</span><span class="hp">7</span></footer>
+          </article>
+        </section>
+      </div>
+
+      <button class="end-turn" type="button">턴 종료</button>
+    </section>
+  </main>
+
+  <script>
+    // 정적 UI 프로토타입: 게임 로직 없음
+  </script>
+</body>
+</html>
